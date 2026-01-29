@@ -17,8 +17,6 @@
 
 ## Theory Problem Set
 
-<div style="page-break-after: always;"></div>
-
 ### 1) Softmax gradient
 
 In problem set 0, you derived the gradient of the log-sum-exp function. Now consider the softmax function **s(z)**, which maps a vector **z** (logits) to a vector with entries:
@@ -29,15 +27,16 @@ $$
 
 **Task:** Derive the gradient of **s** with respect to logits **z**, i.e. derive $\frac{\partial s}{\partial z}$. Consider re-using your work from PS0.
 
+<div style="page-break-after: always;"></div>
+
 #### Solution:
-[placeholder for solution]
+[TODO]
 
 ---
-<div style="page-break-after: always;"></div>
 
 ### 2) Linear threshold neuron for AND / OR
 
-Use a single linear threshold neuron with weights \(w\in\mathbb{R}^2\), bias \(b\in\mathbb{R}\), and \(x\in\{0,1\}^2\):
+Use a single linear threshold neuron with weights $w\in\mathbb{R}^2$, bias $b\in\mathbb{R}$, and $x\in\{0,1\}^2$:
 
 $$
 f(x)=
@@ -49,30 +48,34 @@ $$
 
 **Task A:** Find $w_{\text{AND}}$ and $b_{\text{AND}}$ such that:
 
-| x1 | x2 | fAND(x) |
+| x1 | x2 | $f_{AND}(x)$ |
 |---:|---:|--------:|
 | 0 | 0 | 0 |
 | 0 | 1 | 0 |
 | 1 | 0 | 0 |
 | 1 | 1 | 1 |
 
-**Task B:** Find \(w_{\text{OR}}\) and \(b_{\text{OR}}\) such that:
+**Task B:** Find $w_{\text{OR}}$ and $b_{\text{OR}}$ such that:
 
-| x1 | x2 | fOR(x) |
+| x1 | x2 | $f_{OR}(x)$ |
 |---:|---:|-------:|
 | 0 | 0 | 0 |
 | 0 | 1 | 1 |
 | 1 | 0 | 1 |
 | 1 | 1 | 1 |
 
----
 <div style="page-break-after: always;"></div>
+
+#### Solution:
+[TODO]
+
+---
 
 ### 3) XOR is not linearly separable
 
 Consider XOR:
 
-| x1 | x2 | fXOR(x) |
+| x1 | x2 | $f_{XOR}(x)$ |
 |---:|---:|--------:|
 | 0 | 0 | 0 |
 | 0 | 1 | 1 |
@@ -82,6 +85,11 @@ Consider XOR:
 **Task:** Prove that XOR **cannot** be represented using a linear model of the same form as above.
 
 > Hint: Plot the examples in a plane and reason about whether a linear decision boundary can separate the classes.
+
+<div style="page-break-after: always;"></div>
+
+#### Solution:
+[TODO]
 
 ---
 <div style="page-break-after: always;"></div>
@@ -109,6 +117,8 @@ Questions:
   - Does the method for determining weights matter?
   - Do you think these two have equal representational power? Why or why not?
 
+<div style="page-break-after: always;"></div>
+
 ### Paper Choice 2: *Understanding deep learning requires rethinking generalization*
 
 Questions:
@@ -116,6 +126,8 @@ Questions:
 - How does this finding align (or not) with your understanding of machine learning and generalization?
 
 ---
+
+<div style="page-break-after: always;"></div>
 
 ## Coding: Implement and train a network on MNIST
 

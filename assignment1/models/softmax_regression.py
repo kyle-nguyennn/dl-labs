@@ -68,6 +68,19 @@ class SoftmaxRegression(_baseNetwork):
         #   Store your intermediate outputs before ReLU for backwards               #
         #############################################################################
 
+        print(f"X shape: {X.shape}")
+        print(f"y shape: {y.shape}")
+        W = self.weights['W1']
+        n = y.shape[0]
+        f = W.shape[0]
+        print(f"N = {n}")
+        out = np.matmul(X, W)
+        a = self.ReLU(out)
+        _Dout = self.ReLU_dev(out) # local gradient of a to out
+        h = self.softmax(a)
+        loss = self.cross_entropy_loss(h, y)
+        accuracy = self.compute_accuracy(h, y)
+
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -80,6 +93,15 @@ class SoftmaxRegression(_baseNetwork):
         #        1) Compute gradients of each weight by chain rule                  #
         #        2) Store the gradients in self.gradients                           #
         #############################################################################
+        y_onehot = self._onehot(y, self.num_classes)
+        a_ = y_onehot # uptream backward gradient at a
+        _DW = np.broadcast_to((X.T.sum(axis=1)/n).reshape((f, 1)), (f, self.num_classes))
+        print(f"shape of a_: {a_.shape}")
+        print(f"shape of _Dout: {_Dout.shape}")
+        print(f"shape of _DW.T: {_DW.T.shape}")
+        grad = np.multiply(a_, _Dout) @ (_DW.T)
+        print(f"Upstream grad a W: {grad}")
+        self.gradients['W1'] = np.broadcast_to((grad.sum(axis=0)/n).reshape((1, f)), (self.num_classes, f)).T
 
         #############################################################################
         #                              END OF YOUR CODE                             #

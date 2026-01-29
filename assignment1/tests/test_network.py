@@ -41,6 +41,8 @@ class TestNetwork(unittest.TestCase):
         loss, _ = model.forward(self.test_batch, self.test_label, mode='train')
         w_grad = model.gradients['W1']
         self.assertAlmostEqual(expected_loss, loss, places=5)
+        print(f"w_grad: {np.where(w_grad.sum(axis=1) > 0)}")
+        print(f"expected_grad: {np.where(expected_grad.sum(axis=1) > 0)}")
         diff = np.sum(np.abs(expected_grad - w_grad))
         self.assertAlmostEqual(diff, 0)
 

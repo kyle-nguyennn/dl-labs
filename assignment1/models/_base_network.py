@@ -51,6 +51,14 @@ class _baseNetwork:
         # TODO:                                                                     #
         #    1) Calculate softmax scores of input images                            #
         #############################################################################
+        # print(f"scores: {scores}")
+        n = scores.shape[0]
+        exp_scores = np.exp(scores)
+        sum_exp = exp_scores.sum(axis=1).reshape((n,1))
+        # print(f"sum = {sum_exp}")
+        prob = (exp_scores)/(sum_exp)
+        # print(f"exp scores: {exp_scores}")
+        # print(f"probs: {prob}")
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -71,6 +79,13 @@ class _baseNetwork:
         #    1) Implement Cross-Entropy Loss                                        #
         #############################################################################
 
+        # print(f"x_pred: {x_pred}")
+        # print(f"y_onehot: {y_onehot}")
+        n = y.shape[0] 
+        y_onehot = self._onehot(y, self.num_classes)
+        ew_product = np.multiply(y_onehot, -np.log(x_pred)) # element-wise product
+        # print(f"element-wise product: {ew_product}")
+        loss = np.sum(ew_product)/n
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -88,6 +103,15 @@ class _baseNetwork:
         # TODO:                                                                     #
         #    1) Implement the accuracy function                                     #
         #############################################################################
+        # print(f"x_pred: {x_pred}")
+        # print(f"y_true: {y}")
+
+        y_pred = np.argmax(x_pred, axis=1)
+        # print(f"y_pred: {y_pred}")
+        comp = (y_pred == y)
+        # print(f"y_pred: {y_pred}")
+        # print(f"y_pred == y: {comp}")
+        acc = comp.sum()/len(comp)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -107,6 +131,7 @@ class _baseNetwork:
         # TODO: Comput the sigmoid activation on the input                          #
         #############################################################################
 
+        out = 1/(1+np.exp(-X))
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -124,6 +149,8 @@ class _baseNetwork:
         #    1) Implement the derivative of Sigmoid function                        #
         #############################################################################
 
+        s = self.sigmoid(x)
+        ds = s*(1-s)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -141,6 +168,8 @@ class _baseNetwork:
         #############################################################################
         # TODO: Comput the ReLU activation on the input                          #
         #############################################################################
+
+        out = np.where(X <= 0, 0, X)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -160,7 +189,15 @@ class _baseNetwork:
         # TODO: Comput the gradient of ReLU activation                              #
         #############################################################################
 
+        out = np.where(X <= 0, 0, 1)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
         return out
+    
+    def _onehot(self, y: np.ndarray, nc: int):
+        n = y.shape[0]
+        row_indices = list(range(n))
+        y_onehot = np.zeros((n, nc))
+        y_onehot[row_indices, y] = 1
+        return y_onehot
