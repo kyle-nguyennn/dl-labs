@@ -94,7 +94,10 @@ class SoftmaxRegression(_baseNetwork):
         #############################################################################
         y_onehot = self._onehot(y, self.num_classes)
         _a = (h - y_onehot)/n # uptream backward gradient at a
-        _z = _a * self.ReLU_dev(z)
+        a_prime = self.ReLU_dev(z)
+        print(f"_a shape: {_a.shape}")
+        print(f"ReLU' shape: {a_prime.shape}")
+        _z = _a * a_prime # element wise multiplication
         _W = X.T @ _z
         self.gradients['W1'] = gradient = _W
         print(f"Upstream grad a W: {gradient}")
