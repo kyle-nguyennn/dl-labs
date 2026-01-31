@@ -42,6 +42,12 @@ class _BaseOptimizer:
         #       coefficient                                                         #
         #############################################################################
 
+        # print(f"model weights: {model.weights}")
+        # print(f"model gradients: {model.gradients}")
+        for param, W in model.weights.items():
+            if param.startswith('W'):
+                model.gradients[param] += self.reg * W
+
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
