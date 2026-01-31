@@ -248,6 +248,34 @@ def plot_curves(train_loss_history, train_acc_history, valid_loss_history, valid
     #    2) Plot learning curves of training and validation accuracy            #
     #############################################################################
 
+    epochs = np.arange(1, len(train_loss_history) + 1)
+
+    # Loss curves
+    fig = plt.figure(figsize=(8, 5))
+    plt.plot(epochs, train_loss_history, label='train')
+    plt.plot(epochs, valid_loss_history, label='valid')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Loss Curves')
+    plt.grid(True, linestyle='--', linewidth=0.5, alpha=0.6)
+    plt.legend()
+    plt.tight_layout()
+    fig.savefig('images/loss_curve.png', dpi=150)
+    plt.close(fig)
+
+    # Accuracy curves
+    fig = plt.figure(figsize=(8, 5))
+    plt.plot(epochs, train_acc_history, label='train')
+    plt.plot(epochs, valid_acc_history, label='valid')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.title('Accuracy Curves')
+    plt.grid(True, linestyle='--', linewidth=0.5, alpha=0.6)
+    plt.legend()
+    plt.tight_layout()
+    fig.savefig('images/accuracy_curve.png', dpi=150)
+    plt.close(fig)
+
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
