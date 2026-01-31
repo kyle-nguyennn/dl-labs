@@ -82,7 +82,7 @@ class _baseNetwork:
         # print(f"x_pred: {x_pred}")
         # print(f"y_onehot: {y_onehot}")
         n = y.shape[0] 
-        y_onehot = self._onehot(y, self.num_classes)
+        y_onehot = self._onehot(y)
         ew_product = np.multiply(y_onehot, -np.log(x_pred)) # element-wise product
         # print(f"element-wise product: {ew_product}")
         loss = np.sum(ew_product)/n
@@ -195,9 +195,9 @@ class _baseNetwork:
         #############################################################################
         return out
     
-    def _onehot(self, y: np.ndarray, nc: int):
+    def _onehot(self, y: np.ndarray):
         n = y.shape[0]
         row_indices = list(range(n))
-        y_onehot = np.zeros((n, nc))
+        y_onehot = np.zeros((n, self.num_classes))
         y_onehot[row_indices, y] = 1
         return y_onehot

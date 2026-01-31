@@ -75,10 +75,10 @@ class SoftmaxRegression(_baseNetwork):
         print(f"N = {n}")
         z = np.matmul(X, W)
         a = self.ReLU(z)
-        h = self.softmax(a)
+        p = self.softmax(a)
 
-        loss = self.cross_entropy_loss(h, y)
-        accuracy = self.compute_accuracy(h, y)
+        loss = self.cross_entropy_loss(p, y)
+        accuracy = self.compute_accuracy(p, y)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -92,8 +92,8 @@ class SoftmaxRegression(_baseNetwork):
         #        1) Compute gradients of each weight by chain rule                  #
         #        2) Store the gradients in self.gradients                           #
         #############################################################################
-        y_onehot = self._onehot(y, self.num_classes)
-        _a = (h - y_onehot)/n # uptream backward gradient at a
+        y_onehot = self._onehot(y)
+        _a = (p - y_onehot)/n # uptream backward gradient at a
         a_prime = self.ReLU_dev(z)
         print(f"_a shape: {_a.shape}")
         print(f"ReLU' shape: {a_prime.shape}")

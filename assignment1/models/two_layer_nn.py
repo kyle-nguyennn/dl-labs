@@ -86,6 +86,20 @@ class TwoLayerNet(_baseNetwork):
         #       outputs                                                             #
         #############################################################################
 
+        W1 = self.weights['W1']
+        b1 = self.weights['b1']
+        W2 = self.weights['W2']
+        b2 = self.weights['b2']
+
+        z1 = X @ W1 + b1
+        a1 = self.sigmoid(z1)
+        z2 = a1 @ W2 + b2
+        a2 = self.sigmoid(z2)
+        p = self.softmax(a2)
+
+        loss = self.cross_entropy_loss(p, y)
+        accuracy = self.compute_accuracy(p, y)
+
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -100,6 +114,22 @@ class TwoLayerNet(_baseNetwork):
         #          You may also want to implement the analytical derivative of      #
         #          the sigmoid function in self.sigmoid_dev first                   #
         #############################################################################
+
+        n = X.shape[0] 
+        y_onehot = self._onehot(y)
+        _a2 = 1/n * (p - y_onehot) # dl/da2
+        _z2 = _a2 * self.sigmoid_dev(z2) # element-wise product, as sigmoid is an element-wise function
+        _W2 = a1.T @ _z2 # dl/dw2
+        _b2 = np.ones(self.num_classes)
+        _a1 = _z2 @ W2.T # dl/da1
+        _z1 = _a1 * self.sigmoid_dev(z1)
+        _W1 = X.T @ _z1 # dl/dw1
+        _b1 = np.ones(self.hidden_size)
+
+        self.gradients['W1'] = _W1
+        self.gradients['b1'] = _b1
+        self.gradients['W2'] = _W2
+        self.gradients['b2'] = _b2
 
         #############################################################################
         #                              END OF YOUR CODE                             #
