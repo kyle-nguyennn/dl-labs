@@ -31,6 +31,10 @@ $$
 
 #### Solution:
 [placeholder for solution]
+The softmax function is a function that maps $ \R^{n} -> \R^{n}$
+$$
+s_i = \frac{e^{z_i}}{\sum_k e^{z_k}}
+$$
 
 ---
 <div style="page-break-after: always;"></div>
