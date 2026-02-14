@@ -24,7 +24,12 @@ import time
 import numpy as np
 import random
 
-import matplotlib.pyplot as plt
+# matplotlib is only needed for plotting learning curves; make it optional so
+# unit tests (and headless environments) don't require it.
+try:
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:  # pragma: no cover
+    plt = None
 
 
 def load_csv(path):
@@ -79,6 +84,13 @@ def load_mnist_trainval():
     #       validation. Note: Don't shuffle here.                               #
     #############################################################################
 
+    n = len(data)
+    train_len = int(n*0.8)
+    train_data = data[:train_len]
+    train_label = label[:train_len]
+    val_data = data[train_len:]
+    val_label = label[train_len:]
+
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -127,6 +139,20 @@ def generate_batched_data(data, label, batch_size=32, shuffle=False, seed=None):
     #    It's okay if the size of your last batch is smaller than the required  #
     #    batch size                                                             #
     #############################################################################
+
+    dataset = list(zip(data, label))
+    if shuffle:
+        random.shuffle(dataset)
+
+    n = len(dataset) 
+    batched_data = list()
+    batched_label = list()
+    for i in range(0, n, batch_size):
+        batch = dataset[i:i + batch_size]
+        data_batch, label_batch = list(zip(*batch))
+
+        batched_data.append(np.array(data_batch, dtype=float))
+        batched_label.append(np.array(label_batch, dtype=int))
 
     #############################################################################
     #                              END OF YOUR CODE                             #
@@ -221,6 +247,34 @@ def plot_curves(train_loss_history, train_acc_history, valid_loss_history, valid
     #    1) Plot learning curves of training and validation loss                #
     #    2) Plot learning curves of training and validation accuracy            #
     #############################################################################
+
+    epochs = np.arange(1, len(train_loss_history) + 1)
+
+    # Loss curves
+    fig = plt.figure(figsize=(8, 5))
+    plt.plot(epochs, train_loss_history, label='train')
+    plt.plot(epochs, valid_loss_history, label='valid')
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+    plt.title('Loss Curves')
+    plt.grid(True, linestyle='--', linewidth=0.5, alpha=0.6)
+    plt.legend()
+    plt.tight_layout()
+    fig.savefig('images/loss_curve.png', dpi=150)
+    plt.close(fig)
+
+    # Accuracy curves
+    fig = plt.figure(figsize=(8, 5))
+    plt.plot(epochs, train_acc_history, label='train')
+    plt.plot(epochs, valid_acc_history, label='valid')
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    plt.title('Accuracy Curves')
+    plt.grid(True, linestyle='--', linewidth=0.5, alpha=0.6)
+    plt.legend()
+    plt.tight_layout()
+    fig.savefig('images/accuracy_curve.png', dpi=150)
+    plt.close(fig)
 
     #############################################################################
     #                              END OF YOUR CODE                             #

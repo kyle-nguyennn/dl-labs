@@ -1,5 +1,5 @@
-""" 			  		 			     			  	   		   	  			  	
-Optimizer base.  (c) 2021 Georgia Tech
+"""
+MyModel model.  (c) 2021 Georgia Tech
 
 Copyright 2021, Georgia Institute of Technology (Georgia Tech)
 Atlanta, Georgia 30332
@@ -20,34 +20,36 @@ prohibited and subject to being investigated as a GT honor code violation.
 -----do not edit anything above this line---
 """
 
+import torch
+import torch.nn as nn
 
-class _BaseOptimizer:
-    def __init__(self, learning_rate=1e-4, reg=1e-3):
-        self.learning_rate = learning_rate
-        self.reg = reg
 
-    def update(self, model):
-        pass
+def hello_do_you_copy():
+    """
+    This is a sample function that we will try to import and run to ensure that
+    our environment is correctly set up on Google Colab.
+    """
+    print("Roger that from my_model.py!")
 
-    def apply_regularization(self, model):
-        """
-        Apply L2 penalty to the model. Update the gradient dictionary in the model
-        :param model: The model with gradients
-        :return: None, but the gradient dictionary of the model should be updated
-        """
 
+class MyModel(nn.Module):
+    def __init__(self):
+        super().__init__()
         #############################################################################
-        # TODO:                                                                     #
-        #    1) Apply L2 penalty to model weights based on the regularization       #
-        #       coefficient                                                         #
+        # TODO: Initialize the network weights                                      #
         #############################################################################
-
-        # print(f"model weights: {model.weights}")
-        # print(f"model gradients: {model.gradients}")
-        for param, W in model.weights.items():
-            if param.startswith('W'):
-                model.gradients[param] += self.reg * W
 
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
+
+    def forward(self, x):
+        outs = None
+        #############################################################################
+        # TODO: Implement forward pass of the network                               #
+        #############################################################################
+
+        #############################################################################
+        #                              END OF YOUR CODE                             #
+        #############################################################################
+        return outs

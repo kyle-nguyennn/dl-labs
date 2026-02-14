@@ -71,6 +71,13 @@ class _baseNetwork:
         #    1) Implement Cross-Entropy Loss                                        #
         #############################################################################
 
+        # print(f"x_pred: {x_pred}")
+        # print(f"y_onehot: {y_onehot}")
+        n = y.shape[0] 
+        y_onehot = self._onehot(y, x_pred.shape[1])
+        ew_product = np.multiply(y_onehot, -np.log(x_pred)) # element-wise product
+        # print(f"element-wise product: {ew_product}")
+        loss = np.sum(ew_product)/n
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -164,3 +171,11 @@ class _baseNetwork:
         #                              END OF YOUR CODE                             #
         #############################################################################
         return out
+    
+    def _onehot(self, y: np.ndarray, c=None):
+        c = c or self.num_classes
+        n = y.shape[0]
+        row_indices = list(range(n))
+        y_onehot = np.zeros((n, c))
+        y_onehot[row_indices, y] = 1
+        return y_onehot
