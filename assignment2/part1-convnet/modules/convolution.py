@@ -75,7 +75,16 @@ class Conv2D:
         # Hint: 1) You may use np.pad for padding.                                  #
         #       2) You may implement the convolution with loops                     #
         #############################################################################
-
+        n, c, h, w = x.shape
+        h_prime = (h + 2 * self.padding - self.kernel_size) // self.stride + 1
+        w_prime = (w + 2 * self.padding - self.kernel_size) // self.stride + 1
+        out = np.zeros((n, self.out_channels, h_prime, w_prime))
+        for row in range(h_prime):
+            for col in range(w_prime):
+                x_slice = x[:, :, row * self.stride:row * self.stride + self.kernel_size, col * self.stride:col * self.stride + self.kernel_size]
+                for channel in range(self.out_channels):
+                    out[:, channel, row, col] = np.sum(x_slice * self.weight[channel, :, :, :], axis=(1, 2, 3))
+        out += self.bias[None, :, None, None]
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -95,6 +104,13 @@ class Conv2D:
         #       1) You may implement the convolution with loops                     #
         #       2) don't forget padding when computing dx                           #
         #############################################################################
+        n, c, h, w = dout.shape
+        h_prime = (h + 2 * self.padding - self.kernel_size) // self.stride + 1
+        w_prime = (w + 2 * self.padding - self.kernel_size) // self.stride + 1
+        dx = np.zeros_like(x)
+        dw = np.zeros_like(self.weight)
+        db = np.zeros_like(self.bias)
+        for row in range(h_prime):
 
         #############################################################################
         #                              END OF YOUR CODE                             #
