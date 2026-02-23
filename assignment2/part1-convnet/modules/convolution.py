@@ -76,12 +76,16 @@ class Conv2D:
         #       2) You may implement the convolution with loops                     #
         #############################################################################
         n, c, h, w = x.shape
+        if self.padding > 0:
+            x_padded = np.pad(x, ((0,0), (0,0), (self.padding, self.padding), (self.padding, self.padding)))
+        else:
+            x_padded = x
         h_prime = (h + 2 * self.padding - self.kernel_size) // self.stride + 1
         w_prime = (w + 2 * self.padding - self.kernel_size) // self.stride + 1
         out = np.zeros((n, self.out_channels, h_prime, w_prime))
         for row in range(h_prime):
             for col in range(w_prime):
-                x_slice = x[:, :, row * self.stride:row * self.stride + self.kernel_size, col * self.stride:col * self.stride + self.kernel_size]
+                x_slice = x_padded[:, :, row * self.stride:row * self.stride + self.kernel_size, col * self.stride:col * self.stride + self.kernel_size]
                 for channel in range(self.out_channels):
                     out[:, channel, row, col] = np.sum(x_slice * self.weight[channel, :, :, :], axis=(1, 2, 3))
         out += self.bias[None, :, None, None]
@@ -104,14 +108,35 @@ class Conv2D:
         #       1) You may implement the convolution with loops                     #
         #       2) don't forget padding when computing dx                           #
         #############################################################################
-        n, c, h, w = dout.shape
-        h_prime = (h + 2 * self.padding - self.kernel_size) // self.stride + 1
-        w_prime = (w + 2 * self.padding - self.kernel_size) // self.stride + 1
-        dx = np.zeros_like(x)
-        dw = np.zeros_like(self.weight)
-        db = np.zeros_like(self.bias)
-        for row in range(h_prime):
+        N, C, H, W = x.shape
+        F, _, HH, WW = self.weight.shape
+        _, _, H_out, W_out = dout.shape
 
+        if self.padding > 0:
+            x_padded = np.pad(x, ((0,0), (0,0), (self.padding, self.padding), (self.padding, self.padding)))
+        else:
+            x_padded = x
+
+        dx_padded = np.zeros_like(x_padded)
+        dw = np.zeros_like(self.weight)
+        db = np.sum(dout, axis=(0, 2, 3))
+
+        for i in range(H_out):
+            for j in range(W_out):
+                h_start = i * self.stride
+                w_start = j * self.stride
+                x_slice = x_padded[:, :, h_start:h_start+HH, w_start:w_start+WW]
+                for f in range(F):
+                    dw[f] += np.sum(x_slice * dout[:, f, i, j][:, None, None, None], axis=0)
+                    dx_padded[:, :, h_start:h_start+HH, w_start:w_start+WW] += \
+                        self.weight[f] * dout[:, f, i, j][:, None, None, None]
+
+        if self.padding > 0:
+            self.dx = dx_padded[:, :, self.padding:-self.padding, self.padding:-self.padding]
+        else:
+            self.dx = dx_padded
+        self.dw = dw
+        self.db = db
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
