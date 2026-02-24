@@ -63,7 +63,9 @@ class Linear:
         # TODO: Implement the forward pass.                                         #
         #    HINT: You may want to flatten the input first                          #
         #############################################################################
-
+        N = x.shape[0]
+        x_flatten = x.reshape(N, -1)
+        out = x_flatten.dot(self.weight) + self.bias
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -80,7 +82,11 @@ class Linear:
         #############################################################################
         # TODO: Implement the linear backward pass.                                 #
         #############################################################################
-
+        N = x.shape[0]
+        x_flatten = x.reshape(N, -1)
+        self.dw = x_flatten.T.dot(dout)
+        self.db = np.sum(dout, axis=0)
+        self.dx = dout.dot(self.weight.T).reshape(x.shape)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
