@@ -52,11 +52,20 @@ class MaxPooling:
         # Hint:                                                                     #
         #       1) You may implement the process with loops                         #
         #############################################################################
+        n, c, h, w = x.shape
+        h_prime = (h - self.kernel_size) // self.stride + 1
+        w_prime = (w - self.kernel_size) // self.stride + 1
+        out = np.zeros((n, c, h_prime, w_prime))
+        for i in range(n):
+            for j in range(c):
+                for k in range(h_prime):
+                    for l in range(w_prime):
+                        out[i, j, k, l] = np.max(x[i, j, k*self.stride:k*self.stride+self.kernel_size, l*self.stride:l*self.stride+self.kernel_size])
 
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
-        self.cache = (x, H_out, W_out)
+        self.cache = (x, h_prime, w_prime)
         return out
 
     def backward(self, dout):
@@ -72,6 +81,15 @@ class MaxPooling:
         #       1) You may implement the process with loops                         #
         #       2) You may find np.unravel_index useful                             #
         #############################################################################
+        n, c, h, w = x.shape
+        self.dx = np.zeros_like(x)
+        for i in range(n):
+            for j in range(c):
+                for k in range(H_out):
+                    for l in range(W_out):
+                        x_slice = x[i, j, k*self.stride:k*self.stride+self.kernel_size, l*self.stride:l*self.stride+self.kernel_size]
+                        max_index = np.unravel_index(np.argmax(x_slice), x_slice.shape)
+                        self.dx[i, j, k*self.stride+max_index[0], l*self.stride+max_index[1]] += dout[i, j, k, l]
 
         #############################################################################
         #                              END OF YOUR CODE                             #
