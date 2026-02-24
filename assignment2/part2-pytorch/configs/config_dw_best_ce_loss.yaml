@@ -1,11 +1,11 @@
 Train:
   batch_size: 128
-  learning_rate: 0.01
-  reg: 0.0001
+  learning_rate: 0.001
+  reg: 0.0005
   epochs: 10
   steps: [6, 8]
-  warmup: 1
-  momentum: 0.9
+  warmup: 5
+  momentum: 0.5
   gamma: 1
 
 network:
@@ -13,7 +13,7 @@ network:
   save_best: True
 
 data:
-  imbalance: regular # regular or imbalance
+  imbalance: imbalance # regular or imbalance
   beta: 0.9999
 
 loss:
