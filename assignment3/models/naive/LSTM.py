@@ -57,12 +57,24 @@ class LSTM(nn.Module):
         ################################################################################
 
         # i_t: input gate
+        self.W_i = nn.Parameter(torch.Tensor(input_size, hidden_size))
+        self.U_i = nn.Parameter(torch.Tensor(hidden_size, hidden_size))
+        self.b_i = nn.Parameter(torch.Tensor(hidden_size))
 
         # f_t: the forget gate
+        self.W_f = nn.Parameter(torch.Tensor(input_size, hidden_size))
+        self.U_f = nn.Parameter(torch.Tensor(hidden_size, hidden_size))
+        self.b_f = nn.Parameter(torch.Tensor(hidden_size))
 
         # g_t: the cell gate
+        self.W_g = nn.Parameter(torch.Tensor(input_size, hidden_size))
+        self.U_g = nn.Parameter(torch.Tensor(hidden_size, hidden_size))
+        self.b_g = nn.Parameter(torch.Tensor(hidden_size))
 
         # o_t: the output gate
+        self.W_o = nn.Parameter(torch.Tensor(input_size, hidden_size))
+        self.U_o = nn.Parameter(torch.Tensor(hidden_size, hidden_size))
+        self.b_o = nn.Parameter(torch.Tensor(hidden_size))
 
         ################################################################################
         #                              END OF YOUR CODE                                #
@@ -88,6 +100,18 @@ class LSTM(nn.Module):
         #   Note that this time you are also iterating over all of the time steps.     #
         ################################################################################
         h_t, c_t = None, None  #remove this line when you start implementing your code
+        batch_size, seq_len, _ = x.size()
+        h_t = torch.zeros(batch_size, self.hidden_size)
+        c_t = torch.zeros(batch_size, self.hidden_size)
+        for t in range(seq_len):
+            x_t = x[:, t, :]
+            i_t = torch.sigmoid(x_t @ self.W_i + h_t @ self.U_i + self.b_i)
+            f_t = torch.sigmoid(x_t @ self.W_f + h_t @ self.U_f + self.b_f)
+            g_t = torch.tanh(x_t @ self.W_g + h_t @ self.U_g + self.b_g)
+            o_t = torch.sigmoid(x_t @ self.W_o + h_t @ self.U_o + self.b_o)
+
+            c_t = f_t * c_t + i_t * g_t
+            h_t = o_t * torch.tanh(c_t)
         ################################################################################
         #                              END OF YOUR CODE                                #
         ################################################################################
