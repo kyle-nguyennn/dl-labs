@@ -55,6 +55,15 @@ class Decoder(nn.Module):
         #           of context vector and input                                     #
         # NOTE: Use nn.RNN and nn.LSTM instead of the naive implementation          #
         #############################################################################
+        self.embedding_layer = torch.nn.Embedding(self.output_size, self.emb_size)
+        if self.model_type == "RNN":
+            self.recurrent_layer = torch.nn.RNN(self.emb_size, self.decoder_hidden_size, batch_first=True)
+        elif self.model_type == "LSTM":
+            self.recurrent_layer = torch.nn.LSTM(self.emb_size, self.decoder_hidden_size, batch_first=True)
+        self.linear_layer = torch.nn.Linear(self.decoder_hidden_size, self.output_size)
+        self.dropout_layer = torch.nn.Dropout(dropout)
+        if self.attention:
+            self.attention_linear_layer = torch.nn.Linear(self.encoder_hidden_size + self.emb_size, self.emb_size)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -85,6 +94,8 @@ class Decoder(nn.Module):
         #############################################################################
 
         attention_prob = None   #remove this line when you start implementing your code
+        cosine_sim = torch.nn.functional.cosine_similarity(hidden.transpose(0,1), encoder_outputs, dim=2)
+        attention_prob = torch.nn.functional.softmax(cosine_sim, dim=1).unsqueeze(1)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -124,7 +135,17 @@ class Decoder(nn.Module):
         #       containing both the hidden state and the cell state of the LSTM.    #
         #############################################################################
 
-        output, hidden = None, None     #remove this line when you start implementing your code
+        embedded = self.embedding_layer(input)
+        embedded = self.dropout_layer(embedded)
+        if self.attention:
+            h = hidden[0] if self.model_type == "LSTM" else hidden
+            attention_prob = self.compute_attention(h, encoder_outputs)
+            context_vector = torch.bmm(attention_prob, encoder_outputs)
+            embedded = torch.cat((context_vector, embedded), dim=2)
+            embedded = self.attention_linear_layer(embedded)
+        output, hidden = self.recurrent_layer(embedded, hidden)
+        output = self.linear_layer(output.squeeze(1))
+        output = torch.nn.functional.log_softmax(output, dim=1)
 
         #############################################################################
         #                              END OF YOUR CODE                             #

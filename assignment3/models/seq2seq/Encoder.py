@@ -57,7 +57,15 @@ class Encoder(nn.Module):
         #                                                                           #
         # NOTE: Use nn.RNN and nn.LSTM instead of the naive implementation          #
         #############################################################################
-
+        self.embedding = nn.Embedding(input_size, emb_size)
+        if model_type == "RNN":
+            self.rnn = nn.RNN(emb_size, encoder_hidden_size, batch_first=True)
+        elif model_type == "LSTM":
+            self.rnn = nn.LSTM(emb_size, encoder_hidden_size, batch_first=True)
+        self.fc1 = nn.Linear(encoder_hidden_size, encoder_hidden_size)
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(encoder_hidden_size, decoder_hidden_size)
+        self.dropout = nn.Dropout(dropout)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -86,7 +94,12 @@ class Encoder(nn.Module):
         #       containing both the hidden state and the cell state of the LSTM.    #
         #############################################################################
 
-        output, hidden = None, None     #remove this line when you start implementing your code
+        embedded = self.dropout(self.embedding(input))
+        output, hidden = self.rnn(embedded)
+        if self.model_type == "LSTM":
+            hidden = (torch.tanh(self.fc2(self.relu(self.fc1(hidden[0])))), hidden[1])
+        else:
+            hidden = torch.tanh(self.fc2(self.relu(self.fc1(hidden))))
 
         #############################################################################
         #                              END OF YOUR CODE                             #
