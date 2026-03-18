@@ -104,7 +104,9 @@ class TransformerTranslator(nn.Module):
         # Deliverable 3: Initialize what you need for the feed-forward layer.        # 
         # Don't forget the layer normalization.                                      #
         ##############################################################################
-        
+        self.ff_layer1 = nn.Linear(self.hidden_dim, self.dim_feedforward)  # First linear layer of the feed-forward network
+        self.ff_layer2 = nn.Linear(self.dim_feedforward, self.hidden_dim)  # Second linear layer of the feed-forward network
+        self.norm_ff = nn.LayerNorm(self.hidden_dim)  # Layer normalization for the feed 
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -114,7 +116,7 @@ class TransformerTranslator(nn.Module):
         # TODO:
         # Deliverable 4: Initialize what you need for the final layer (1-2 lines).   #
         ##############################################################################
-        
+        self.final_projection = nn.Linear(self.hidden_dim, self.output_size)  # Final linear layer to project to output size 
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -136,7 +138,10 @@ class TransformerTranslator(nn.Module):
         # You will need to use all of the methods you have previously defined above.#
         # You should only be calling TransformerTranslator class methods here.      #
         #############################################################################
-        outputs = None      #remove this line when you start implementing your code
+        embeddings = self.embed(inputs)  # Get embeddings for the input sequences
+        mh_outputs = self.multi_head_attention(embeddings)  # Apply multi-head attention
+        ff_outputs = self.feedforward_layer(mh_outputs)  # Apply feedforward layer
+        outputs = self.final_layer(ff_outputs)  # Apply final layer to get output scores
         
         ##############################################################################
         #                               END OF YOUR CODE                             #
@@ -178,7 +183,17 @@ class TransformerTranslator(nn.Module):
         # Deliverable 2: Implement multi-head self-attention followed by add + norm.#
         # Use the provided 'Deliverable 2' layers initialized in the constructor.   #
         #############################################################################
-        outputs = None      #remove this line when you start implementing your code
+        Q1, K1, V1 = self.q1(inputs), self.k1(inputs), self.v1(inputs)  # Compute queries, keys, and values for head 1
+        Q2, K2, V2 = self.q2(inputs), self.k2(inputs), self.v2(inputs)  # Compute queries, keys, and values for head 2
+        # Compute attention scores
+        A1 = torch.bmm(self.softmax(torch.bmm(Q1, K1.transpose(1, 2)) / (self.dim_k ** 0.5)), V1)  # Scaled dot-product attention for head 1
+        A2 = torch.bmm(self.softmax(torch.bmm(Q2, K2.transpose(1, 2)) / (self.dim_k ** 0.5)), V2)  # Scaled dot-product attention for head 2
+        # Concatenate attention outputs from both heads
+        A = torch.cat((A1, A2), dim=2)  # Concatenate along the feature dimension
+        # Project the concatenated attention outputs back to the hidden dimension
+        projected_A = self.attention_head_projection(A)  # Linear projection of concatenated attention outputs
+        # Add & Norm
+        outputs = self.norm_mh(inputs + projected_A)  # Add & Norm step
         
         ##############################################################################
         #                               END OF YOUR CODE                             #
@@ -199,7 +214,8 @@ class TransformerTranslator(nn.Module):
         # initialized them.                                                         #
         # This should not take more than 3-5 lines of code.                         #
         #############################################################################
-        outputs = None      #remove this line when you start implementing your code
+        ff_output = self.ff_layer2(torch.relu(self.ff_layer1(inputs)))  # Feedforward network with ReLU activation
+        outputs = self.norm_ff(inputs + ff_output)  # Add & Norm step, residual connection
         
         ##############################################################################
         #                               END OF YOUR CODE                             #
@@ -219,7 +235,7 @@ class TransformerTranslator(nn.Module):
         # This should only take about 1 line of code. Softmax is not needed here    #
         # as it is integrated as part of cross entropy loss function.               #
         #############################################################################
-        outputs = None      #remove this line when you start implementing your code
+        outputs = self.final_projection(inputs)  # Project to output size
                 
         ##############################################################################
         #                               END OF YOUR CODE                             #
