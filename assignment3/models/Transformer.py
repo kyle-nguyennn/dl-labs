@@ -71,8 +71,8 @@ class TransformerTranslator(nn.Module):
         # You will need to use the max_length parameter above.                       #
         # Don’t worry about sine/cosine encodings- use positional encodings.         #
         ##############################################################################
-        self.embeddingL = None      #initialize word embedding layer
-        self.posembeddingL = None   #initialize positional embedding layer
+        self.embeddingL = nn.Embedding(self.input_size, self.hidden_dim)      #initialize word embedding layer
+        self.posembeddingL = nn.Embedding(self.max_length, self.hidden_dim)   #initialize positional embedding layer
 
         ##############################################################################
         #                               END OF YOUR CODE                             #
@@ -154,8 +154,10 @@ class TransformerTranslator(nn.Module):
         # Deliverable 1: Return the embeddings.                                     #
         # This will take a few lines.                                               #
         #############################################################################
-      
-        embeddings = None       #remove this line when you start implementing your code
+        token_embeddings = self.embeddingL(inputs)    #get token embeddings from the embedding layer
+        position_indices = torch.arange(inputs.size(1), device=inputs.device).unsqueeze(0)  #create position indices for positional embeddings
+        position_embeddings = self.posembeddingL(position_indices)  #get positional embeddings from the positional embedding layer
+        embeddings = token_embeddings + position_embeddings  #combine token and positional embeddings by summing them 
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
