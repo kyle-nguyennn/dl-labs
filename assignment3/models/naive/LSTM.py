@@ -101,8 +101,8 @@ class LSTM(nn.Module):
         ################################################################################
         h_t, c_t = None, None  #remove this line when you start implementing your code
         batch_size, seq_len, _ = x.size()
-        h_t = torch.zeros(batch_size, self.hidden_size)
-        c_t = torch.zeros(batch_size, self.hidden_size)
+        h_t = torch.zeros(batch_size, self.hidden_size, device=x.device)
+        c_t = torch.zeros(batch_size, self.hidden_size, device=x.device)
         for t in range(seq_len):
             x_t = x[:, t, :]
             i_t = torch.sigmoid(x_t @ self.W_i + h_t @ self.U_i + self.b_i)
