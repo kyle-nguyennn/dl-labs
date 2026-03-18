@@ -44,7 +44,8 @@ class Seq2Seq(nn.Module):
         #    that the models are on the same device (CPU/GPU). This should take no  #
         #    more than 2 lines of code.                                             #
         #############################################################################
-
+        self.encoder = encoder
+        self.decoder = decoder
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -73,10 +74,15 @@ class Seq2Seq(nn.Module):
         #          will have to be manipulated before being fed in as the decoder   #
         #          input at the next time step.                                     #
         #############################################################################
+        encoder_output, hidden = self.encoder.forward(source)  # get the last hidden representation from the encoder
+        input = source[:, 0].unsqueeze(1)  # the first input for the decoder should be the <sos> token
 
-        outputs = None      #remove this line when you start implementing your code
         # initially set outputs as a tensor of zeros with dimensions (batch_size, seq_len, decoder_output_size)
-
+        outputs = torch.zeros(batch_size, seq_len, self.decoder.output_size).to(self.device)
+        for t in range(seq_len):
+            output, hidden = self.decoder.forward(input, hidden, encoder_output)  # feed the input and hidden state into the decoder
+            outputs[:, t, :] = output  # add the output to the final outputs
+            input = output.argmax(1).unsqueeze(1)  # update the input being fed into the decoder at each time step
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
