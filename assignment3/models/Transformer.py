@@ -319,7 +319,7 @@ class FullTransformerTranslator(nn.Module):
         tgt_emb = self.tgtembeddingL(tgt) + self.tgtposembeddingL(torch.arange(tgt.size(1), device=tgt.device))
 
         # create target mask and target key padding mask for decoder - Both have boolean values
-        tgt_mask = self.transformer.generate_square_subsequent_mask(tgt.size(1)).to(src.device)  # Mask to prevent attention to future tokens
+        tgt_mask = self.transformer.generate_square_subsequent_mask(tgt.size(1)).bool().to(src.device)  # Mask to prevent attention to future tokens
         tgt_key_padding_mask = (tgt == self.pad_idx)  # Mask to ignore padding tokens in the target sequences
 
         # invoke transformer to generate output
@@ -348,16 +348,19 @@ class FullTransformerTranslator(nn.Module):
         # Deliverable 5: You will be calling the transformer forward function to    #
         # generate the translation for the input.                                   #
         #############################################################################
-        outputs = torch.zeros(src.size(0), self.max_length, self.output_size, device=src.device)  # Initialize outputs tensor
-        tgt = torch.full((src.size(0), self.max_length), self.pad_idx, dtype=torch.long, device=src.device)
-        # initially set outputs as a tensor of zeros with dimensions (batch_size, seq_len, output_size)
-        # initially set tgt as a tensor of <pad> tokens with dimensions (batch_size, seq_len)
-        for t in range(self.max_length):
-            # Generate output for the current time step
-            output = self.forward(src, tgt)  # Get the output scores for the current target sequence
-            outputs[:, t, :] = output[:, t, :]  # Store the output scores for the current time step
-            predicted_tokens = output.argmax(dim=2)  # Get the predicted tokens by taking the argmax over the output scores
-            tgt[:, t] = predicted_tokens[:, t]  # Update the target sequence with the predicted tokens for the next iteration
+        with torch.no_grad():
+            outputs = torch.zeros(src.size(0), self.max_length, self.output_size, device=src.device)  # Initialize outputs tensor
+            tgt = torch.full((src.size(0), self.max_length), self.pad_idx, dtype=torch.long, device=src.device)
+            tgt[:, 0] = 2  # <sos> token
+            # initially set outputs as a tensor of zeros with dimensions (batch_size, seq_len, output_size)
+            # initially set tgt as a tensor of <pad> tokens with dimensions (batch_size, seq_len)
+            for t in range(self.max_length):
+                # Generate output for the current time step
+                output = self.forward(src, tgt)  # Get the output scores for the current target sequence
+                outputs[:, t, :] = output[:, t, :]  # Store the output scores for the current time step
+                if t+1 < self.max_length:
+                    predicted_token = output[:, t, :].argmax(dim=-1)  # Get the predicted tokens by taking the argmax over the output scores
+                    tgt[:, t+1] = predicted_token  # Update the target sequence with the predicted tokens for the next iteration
 
 
         ##############################################################################
