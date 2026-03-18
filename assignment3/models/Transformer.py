@@ -266,7 +266,15 @@ class FullTransformerTranslator(nn.Module):
         # Deliverable 1: Initialize what you need for the Transformer Layer          #
         # You should use nn.Transformer                                              #
         ##############################################################################
-
+        self.transformer = nn.Transformer(
+            d_model=self.hidden_dim, 
+            nhead=self.num_heads, 
+            num_encoder_layers=num_layers_enc, 
+            num_decoder_layers=num_layers_dec, 
+            dim_feedforward=self.dim_feedforward, 
+            dropout=dropout,
+            batch_first=True,
+        )
         ##############################################################################
         # TODO:
         # Deliverable 2: Initialize what you need for the embedding lookup.          #
@@ -275,15 +283,15 @@ class FullTransformerTranslator(nn.Module):
         # Don’t worry about sine/cosine encodings- use positional encodings.         #
         ##############################################################################
         # Do not change the order for these variables
-        self.srcembeddingL = None       #embedding for src
-        self.tgtembeddingL = None       #embedding for target
-        self.srcposembeddingL = None    #embedding for src positional encoding
-        self.tgtposembeddingL = None    #embedding for target positional encoding
+        self.srcembeddingL = nn.Embedding(input_size, hidden_dim)       #embedding for src
+        self.tgtembeddingL = nn.Embedding(output_size, hidden_dim)       #embedding for target
+        self.srcposembeddingL = nn.Embedding(max_length, hidden_dim)    #embedding for src positional encoding
+        self.tgtposembeddingL = nn.Embedding(max_length, hidden_dim)    #embedding for target positional encoding
         ##############################################################################
         # TODO:
         # Deliverable 3: Initialize what you need for the final layer.               #
         ##############################################################################
-
+        self.final_projection = nn.Linear(self.hidden_dim, self.output_size)  # Final linear layer to project to output size
         ##############################################################################
         #                               END OF YOUR CODE                             #
         ##############################################################################
@@ -307,12 +315,18 @@ class FullTransformerTranslator(nn.Module):
 
 
         # embed src and tgt for processing by transformer
+        src_emb = self.srcembeddingL(src) + self.srcposembeddingL(torch.arange(src.size(1), device=src.device))
+        tgt_emb = self.tgtembeddingL(tgt) + self.tgtposembeddingL(torch.arange(tgt.size(1), device=tgt.device))
 
         # create target mask and target key padding mask for decoder - Both have boolean values
+        tgt_mask = self.transformer.generate_square_subsequent_mask(tgt.size(1)).to(src.device)  # Mask to prevent attention to future tokens
+        tgt_key_padding_mask = (tgt == self.pad_idx)  # Mask to ignore padding tokens in the target sequences
 
         # invoke transformer to generate output
+        transformer_output = self.transformer(src_emb, tgt_emb, tgt_mask=tgt_mask, tgt_key_padding_mask=tgt_key_padding_mask)
 
         # pass through final layer to generate outputs
+        outputs = self.final_projection(transformer_output)  # Project to output size
 
         ##############################################################################
         #                               END OF YOUR CODE                             #
@@ -334,10 +348,17 @@ class FullTransformerTranslator(nn.Module):
         # Deliverable 5: You will be calling the transformer forward function to    #
         # generate the translation for the input.                                   #
         #############################################################################
-        outputs = None      #remove this line when you start implementing your code
-        tgt=None            #used as an temporary variable to keep track of predicted tokens
+        outputs = torch.zeros(src.size(0), self.max_length, self.output_size, device=src.device)  # Initialize outputs tensor
+        tgt = torch.full((src.size(0), self.max_length), self.pad_idx, dtype=torch.long, device=src.device)
         # initially set outputs as a tensor of zeros with dimensions (batch_size, seq_len, output_size)
         # initially set tgt as a tensor of <pad> tokens with dimensions (batch_size, seq_len)
+        for t in range(self.max_length):
+            # Generate output for the current time step
+            output = self.forward(src, tgt)  # Get the output scores for the current target sequence
+            outputs[:, t, :] = output[:, t, :]  # Store the output scores for the current time step
+            predicted_tokens = output.argmax(dim=2)  # Get the predicted tokens by taking the argmax over the output scores
+            tgt[:, t] = predicted_tokens[:, t]  # Update the target sequence with the predicted tokens for the next iteration
+
 
         ##############################################################################
         #                               END OF YOUR CODE                             #
