@@ -1,0 +1,23 @@
+name: cs7643-a4
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+dependencies:
+  - python==3.11
+  - matplotlib
+  - tqdm
+  - jupyter
+  - notebook
+  - pip
+  - pytorch
+  - torchvision
+  - torchaudio
+  - pytorch-cuda=12.1
+  - numpy
+  - pyyaml
+  - pip:
+    - pytorch-fid
+
+
