@@ -78,7 +78,9 @@ class VAETrainer(Trainer):
                 #    2. compute the loss (self.criterion). dont forget to reshape output
                 #    3. compute loss and backwards pass.                                   #
                 #############################################################################
-                
+                out, mu, logvar = model.forward(data)
+                out = out.reshape(data.shape)
+                loss, l2, l_kl = loss_func.forward(out, data, mu, logvar)
                 #############################################################################
                 #                              END OF YOUR CODE                             #
                 #############################################################################

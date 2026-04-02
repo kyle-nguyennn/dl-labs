@@ -23,8 +23,8 @@ class VAELoss(nn.Module):
         #    3. compute beta weighted loss    
         #    4. use the if statement below to inform you of the containers to store the loss    #
         #############################################################################
-        print(f"mu shape: {mu.shape}")
-        print(f"input shape: {original.shape}")
+        # print(f"mu shape: {mu.shape}")
+        # print(f"input shape: {original.shape}")
         loss_recon = self.reconstruction_loss(reconstructed, original) * 784 # don't average per dimension
         var = torch.exp(logvar)
         loss_kl = -0.5*torch.sum((1 + logvar - mu**2 - var)) # sum along latent dim, and batch
