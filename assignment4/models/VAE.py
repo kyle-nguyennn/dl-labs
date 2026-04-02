@@ -25,6 +25,10 @@ class BasicEncoder(nn.Module):
         #     both use the same latent dim.                                         #
         #############################################################################
         
+        self.linear_layer = nn.Linear(self.input_dim, self.hidden_dim)
+        self.relu = nn.ReLU()
+        self.mu_layer = nn.Linear(self.hidden_dim, self.latent_dim)
+        self.logvar_layer = nn.Linear(self.hidden_dim, self.latent_dim)
         
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -47,6 +51,9 @@ class BasicEncoder(nn.Module):
         #    1. implement forward pass for encoder.                        #
         #    2. return mu and logvar                                    #
         #############################################################################
+        hidden = self.relu(self.linear_layer(x))
+        mu = self.mu_layer(hidden)
+        logvar = self.logvar_layer(hidden)
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -81,8 +88,8 @@ class VAE(nn.Module):
         #   NOTE: Decoder implementation is already provided. 
         #       Only need to instantiate it with appropriate args                  #
         #############################################################################
-        self.encoder = None
-        self.decoder = None
+        self.encoder = BasicEncoder(input_dim=self.input_dim, hidden_dim=self.hidden_dim, latent_dim=self.latent_dim)
+        self.decoder = BasicDecoder(latent_dim=self.latent_dim, hidden_dim=self.hidden_dim, output_dim=self.input_dim)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -106,6 +113,9 @@ class VAE(nn.Module):
         #    2. sample epsilon
         #    3. compute reparameterization.                                         #
         #############################################################################
+        std = torch.exp(logvar * 0.5) # logvar = log(std^2)
+        epsilon = torch.randn(mu.shape)
+        z = mu + epsilon * std
 
         #############################################################################
         #                              END OF YOUR CODE                             #
@@ -130,7 +140,9 @@ class VAE(nn.Module):
         #    1. encode imput image (NOTE recall the vae takes a flattened input)
         #    2. compute reparameterization                                  #
         #############################################################################
-
+        x_flatten = torch.flatten(x, start_dim=1) # keep batch
+        mu, logvar = self.encoder.forward(x_flatten)
+        z = self.reparameterize(mu, logvar)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -151,7 +163,8 @@ class VAE(nn.Module):
         # TODO:                                                                     #
         #    1. invoke encoder and decoder to obtain reconstructed output, mu and logvar #
         #############################################################################
-
+        z, mu, logvar = self.encode(x)
+        out = self.decoder.forward(z)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
