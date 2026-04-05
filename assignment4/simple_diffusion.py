@@ -39,6 +39,8 @@ class SimpleDiffusionTrainer:
         loss = None
         pred_noise = None
 
+        print(f"image shape = {image.shape}")
+        print(f"noise shape = {fixed_noise.shape}")
 
         #############################################################################
         # TODO:                                                                     #
@@ -48,7 +50,13 @@ class SimpleDiffusionTrainer:
         #     3. compute loss between ground truth noise and predicted noise. and then apply backprop.
         #     4. use the variables for loss and pred_noise defined above as those are returned.                                  #
         #############################################################################
-
+        noisy_image = image + fixed_noise
+        pred_noise = self.model.forward(noisy_image).view_as(fixed_noise)
+        # pred_noise = noise.detach()
+        loss = F.mse_loss(pred_noise, fixed_noise)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -72,7 +80,9 @@ class SimpleDiffusionTrainer:
         #     2. use the predicted noise to denoise the image.   
         #      3. use the denoised_image and pred_noise variable to store the respective data #
         #############################################################################
-
+        pred_noise = self.model.forward(noisy_image)
+        pred_noise = pred_noise.view_as(noisy_image)
+        denoised_image = noisy_image - pred_noise
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
