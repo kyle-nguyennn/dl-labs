@@ -54,6 +54,7 @@ class BasicEncoder(nn.Module):
         hidden = self.relu(self.linear_layer(x))
         mu = self.mu_layer(hidden)
         logvar = self.logvar_layer(hidden)
+        logvar = torch.clamp(logvar, min=-20, max=20)
 
         #############################################################################
         #                              END OF YOUR CODE                             #

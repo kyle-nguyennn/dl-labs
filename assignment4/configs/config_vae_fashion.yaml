@@ -1,8 +1,8 @@
 data:
-  dataset: mnist # mnist
+  dataset: fashionmnist # mnist
 train:
   batch_size: 64
-  lr: 0.001
+  lr: 0.0005
   n_epochs: 50
   num_workers: 4 # change this based on number of cores on your CPU. 4 is sufficient for 1 gpu. If unsure leave at 1.
 network:

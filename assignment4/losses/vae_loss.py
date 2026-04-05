@@ -27,8 +27,8 @@ class VAELoss(nn.Module):
         # print(f"input shape: {original.shape}")
         loss_recon = self.reconstruction_loss(reconstructed, original) * 784 # don't average per dimension
         var = torch.exp(logvar)
-        loss_kl = -0.5*torch.sum((1 + logvar - mu**2 - var)) # sum along latent dim, and batch
-        loss = loss_recon + self.beta*loss_kl
+        loss_kl = -0.5 * torch.sum(1 + logvar - mu**2 - var) # sum along latent dim, and batch
+        loss = loss_recon + self.beta * loss_kl
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################

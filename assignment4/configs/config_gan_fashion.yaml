@@ -1,5 +1,5 @@
 data:
-  dataset: mnist # mnist   
+  dataset: fashionmnist # mnist   
 train:
   batch_size: 128
   lr: 0.0002
