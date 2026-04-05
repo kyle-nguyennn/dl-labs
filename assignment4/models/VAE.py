@@ -113,8 +113,8 @@ class VAE(nn.Module):
         #    2. sample epsilon
         #    3. compute reparameterization.                                         #
         #############################################################################
-        std = torch.exp(logvar * 0.5) # logvar = log(std^2)
-        epsilon = torch.randn(mu.shape)
+        std = torch.exp(logvar * 0.5).to(mu.device) # logvar = log(std^2)
+        epsilon = torch.randn(mu.shape).to(mu.device)
         z = mu + epsilon * std
 
         #############################################################################
