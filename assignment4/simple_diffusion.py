@@ -39,8 +39,6 @@ class SimpleDiffusionTrainer:
         loss = None
         pred_noise = None
 
-        print(f"image shape = {image.shape}")
-        print(f"noise shape = {fixed_noise.shape}")
 
         #############################################################################
         # TODO:                                                                     #
