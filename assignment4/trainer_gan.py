@@ -78,7 +78,11 @@ class GANTrainer(Trainer):
         # 1. sample real data, put on device, and create 'real' labels,
         # 2. obtain discriminater assessment on real images, obtain loss on real images using self.criterion
         #############################################################################
-        return None
+        x = data.flatten(start_dim=1).to(self.device)
+        labels = torch.ones(batch_size, 1).to(self.device)
+        pred = self.discriminator.forward(x)
+        real_loss = self.criterion(pred, labels)
+        return real_loss
 
     def compute_loss_fake(self, batch_size, latent_dim):
         #############################################################################
@@ -86,8 +90,13 @@ class GANTrainer(Trainer):
         # 1. sample latents for fake images, create 'fake' labels. dont forget to detatch generator output from graph.
         # 2. obtain discriminater assessment on fake images, obtain loss on fake images using self.criterion
         #############################################################################
-
-        return None
+        latent = torch.randn(batch_size, latent_dim).to(self.device)
+        labels = torch.zeros(batch_size, 1).to(self.device)
+        with torch.no_grad():
+            generated = self.generator.forward(latent)
+        pred = self.discriminator.forward(generated)
+        fake_loss = self.criterion(pred, labels)
+        return fake_loss
 
     def compute_loss_gen(self, batch_size, latent_dim):
         #############################################################################
@@ -95,9 +104,13 @@ class GANTrainer(Trainer):
         #  1. use generator with new latents to obtain fakes. create labels
         #  2. get discriminator assessment on fakes and compute loss using self.criterion
         #############################################################################
-
-        return None
-
+        
+        latent = torch.randn(batch_size, latent_dim).to(self.device)
+        expected_labels = torch.ones(batch_size, 1).to(self.device) # generator expect discriminator to predict real image
+        generated = self.generator.forward(latent) # need grads to train generator
+        pred = self.discriminator.forward(generated)
+        gen_loss = self.criterion(pred, expected_labels)
+        return gen_loss
 
     def train(self):
         start = time.time()
@@ -141,6 +154,17 @@ class GANTrainer(Trainer):
                 # 1. compute the generator loss and take step to optimize generator.
                 #############################################################################
 
+                loss_real = self.compute_loss_real(data, batch_size) 
+                loss_fake = self.compute_loss_fake(batch_size, latent_dim)
+                loss_disc = loss_real + loss_fake
+                self.optimizer_disc.zero_grad()
+                loss_disc.backward()
+                self.optimizer_disc.step()
+
+                loss_gen = self.compute_loss_gen(batch_size, latent_dim)
+                self.optimizer_gen.zero_grad()
+                loss_gen.backward()
+                self.optimizer_gen.step()
 
                 #############################################################################
                 #                              END OF YOUR CODE                             #
