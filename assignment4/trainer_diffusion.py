@@ -112,8 +112,14 @@ class DiffusionTrainer(Trainer):
                 # 3. Predict noise using current model                                     #
                 # 4. Update model parameters using prediction error                        #
                 #############################################################################
-                loss, out, noise = None, None, None # use this variables to store loss, predicted noise and noise.
+                t = torch.randint(0, self.timesteps, (data.size(0),), device=self.device).unsqueeze(1)
+                x_t, noise = self.forward_diffusion(data, t)
+                out = self.net(x_t, t)
+                loss = self.criterion(out, noise)
 
+                self.optimizer.zero_grad()
+                loss.backward()
+                self.optimizer.step()
                 #############################################################################
                 #                              END OF YOUR CODE                             #
                 #############################################################################
