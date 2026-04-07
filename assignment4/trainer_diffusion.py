@@ -40,7 +40,9 @@ class DiffusionTrainer(Trainer):
         # - What       ranges for beta?                                    #
         # - What does the cumulative product represent?                           #
         #############################################################################
-
+        self.beta = torch.Tensor(np.linspace(self.noise_start, self.noise_end, self.timesteps)).to(self.device)
+        self.alpha = 1-self.beta
+        self.alphas_bar = torch.cumprod(self.alpha, dim=0)
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -68,7 +70,11 @@ class DiffusionTrainer(Trainer):
         # - Why this particular combination of terms?                               #
         # - How does this relate to the reverse process?                            #
         #############################################################################
-
+        cum_alpha_t = self.alphas_bar[t].reshape(-1, 1,1,1)
+        mu = torch.sqrt(cum_alpha_t)*x_0
+        sigma = torch.sqrt(1-cum_alpha_t)
+        noise = torch.randn_like(mu)
+        x_t = mu + sigma*noise
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
@@ -143,7 +149,14 @@ class DiffusionTrainer(Trainer):
         #    b. Combine current sample and predicted noise                          #
         # 4. Add variance term if t>0, otherwise return mean                        #
         #############################################################################
-
+        predicted_noise = self.net(x, t)
+        beta_t = self.beta[t].reshape(-1, 1,1,1)
+        alpha_t = self.alpha[t].reshape(-1, 1,1,1)
+        alpha_bar_t = self.alphas_bar[t].reshape(-1, 1,1,1)
+        mu = 1/torch.sqrt(alpha_t)*(x - beta_t/(torch.sqrt(1-alpha_bar_t))*predicted_noise)
+        noise_mask = (t.reshape(-1,1,1,1) > 0).float()
+        z = torch.randn_like(mu)
+        x_prev = mu + noise_mask * torch.sqrt(beta_t) * z
         #############################################################################
         #                              END OF YOUR CODE                             #
         #############################################################################
