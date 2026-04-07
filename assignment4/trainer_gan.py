@@ -81,6 +81,7 @@ class GANTrainer(Trainer):
         x = data.flatten(start_dim=1).to(self.device)
         labels = torch.ones(batch_size, 1).to(self.device)
         pred = self.discriminator.forward(x)
+        pred = torch.clamp(pred, 1e-7, 1 - 1e-7)
         real_loss = self.criterion(pred, labels)
         return real_loss
 
@@ -95,6 +96,7 @@ class GANTrainer(Trainer):
         with torch.no_grad():
             generated = self.generator.forward(latent)
         pred = self.discriminator.forward(generated)
+        pred = torch.clamp(pred, 1e-7, 1 - 1e-7)
         fake_loss = self.criterion(pred, labels)
         return fake_loss
 
@@ -109,6 +111,7 @@ class GANTrainer(Trainer):
         expected_labels = torch.ones(batch_size, 1).to(self.device) # generator expect discriminator to predict real image
         generated = self.generator.forward(latent) # need grads to train generator
         pred = self.discriminator.forward(generated)
+        pred = torch.clamp(pred, 1e-7, 1 - 1e-7)
         gen_loss = self.criterion(pred, expected_labels)
         return gen_loss
 
