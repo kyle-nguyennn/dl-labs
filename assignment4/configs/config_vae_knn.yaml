@@ -1,0 +1,22 @@
+data:
+  dataset: mnist
+diffusion:
+  time_dim: 128
+  timesteps: 500
+gan:
+  leaky: false
+network:
+  hidden_dim: 512
+  latent_dim: 32
+  model: vae
+optimizer:
+  type: adamw
+  weight_decay: 0.0001
+train:
+  batch_size: 64
+  lr: 0.001
+  n_epochs: 50
+  num_workers: 4
+vae:
+  beta: 0.1
+  vae_recon_loss: l2

@@ -1,0 +1,22 @@
+data:
+  dataset: mnist
+train:
+  batch_size: 128
+  lr: 0.002
+  n_epochs: 50
+  num_workers: 4
+network:
+  model: gan
+  hidden_dim: 256
+  latent_dim: 16
+vae:
+  vae_recon_loss: l2
+  beta: 2
+diffusion:
+  time_dim: 128
+  timesteps: 500
+optimizer:
+  type: 'adamw'
+  weight_decay: 0.0
+gan:
+  leaky: True
